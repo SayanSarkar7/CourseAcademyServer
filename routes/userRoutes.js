@@ -1,5 +1,5 @@
 import express from "express";
-import { getMyProfile, login, logout, register } from "../controllers/userController.js";
+import { changePassword, getMyProfile, login, logout, register, updateProfile, updateProfilePicture } from "../controllers/userController.js";
 import { isAuthenticated } from "../middlewares/Auth.js";
  
 const router=express.Router();
@@ -17,8 +17,11 @@ router.route("/logout").get(logout);
 router.route("/me").get(isAuthenticated,getMyProfile);
 
 // Change Password
+router.route("/changepassword").put(isAuthenticated,changePassword);
 // Update Profile
+router.route("/updateprofile").put(isAuthenticated,updateProfile);
 // Update Profile Picture
+router.route("/updateprofilepicture").put(isAuthenticated,updateProfilePicture);
 
 // Forget Password
 // Reset Password
