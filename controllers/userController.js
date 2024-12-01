@@ -60,13 +60,24 @@ export const login = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const logout = catchAsyncErrors(async (req, res, next) => {
-  res.status(200).cookie("token",null,{
-    expires:new Date(Date.now()),
-    httpOnly:true,
-    // secure:true,
-    sameSite:"none",
-  }).json({
-    success:true,
-    message:"Logged Out Successfully",
-  })
+  res
+    .status(200)
+    .cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      // secure:true,
+      sameSite: "none",
+    })
+    .json({
+      success: true,
+      message: "Logged Out Successfully",
+    });
+});
+
+export const getMyProfile = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
