@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import validator from "validator";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const schema = new mongoose.Schema({
   name: {
@@ -20,7 +21,7 @@ const schema = new mongoose.Schema({
     unique: true,
     select: false, //when we access the user then we will not get the password by default
     minLength: [6, "Password must be at least 6 characters"],
-    select:false,
+    select: false,
   },
   role: {
     type: String,
@@ -54,27 +55,38 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  ResetPasswordToken: String,
-  ResetPasswordExpire: String,
+  resetPasswordToken: String,
+  resetPasswordExpire: String,
 });
 
 // hashing the password
-schema.pre("save",async function (next){
-  if(!this.isModified("password")){
+schema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
     return next();
   }
-  const hashedPassword=await bcrypt.hash(this.password,10);
-  this.password=hashedPassword;
+  const hashedPassword = await bcrypt.hash(this.password, 10);
+  this.password = hashedPassword;
   next();
-})
+});
 
-schema.methods.getJWTToken=function (){
-  return jwt.sign({_id:this._id},process.env.JWT_SECRET,{
-    expiresIn:"15d",
-  })
-}
-schema.methods.comparePassword=async function (password){
-  return await bcrypt.compare(password,this.password);
-}
+schema.methods.getJWTToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: "15d",
+  });
+};
+schema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+// console.log(crypto.randomBytes(20).toString("hex"));
+
+schema.methods.getResetToken = async function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.resetPasswordExpire = Date.now() + 1000 * 60 * 15;
+  return resetToken;
+};
 
 export const User = mongoose.model("User", schema);
