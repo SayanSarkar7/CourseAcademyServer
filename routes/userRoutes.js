@@ -1,5 +1,5 @@
 import express from "express";
-import { changePassword, forgetPassword, getMyProfile, login, logout, register, resetPassword, updateProfile, updateProfilePicture } from "../controllers/userController.js";
+import { addToPlaylist, changePassword, forgetPassword, getMyProfile, login, logout, register, removeFromPlaylist, resetPassword, updateProfile, updateProfilePicture } from "../controllers/userController.js";
 import { isAuthenticated } from "../middlewares/Auth.js";
  
 const router=express.Router();
@@ -30,7 +30,9 @@ router.route("/resetpassword/:token").put(resetPassword);
 
 
 // AddToPlaylist
+router.route("/addtoplaylist").post(isAuthenticated,addToPlaylist);
 // RemoveFromPlaylist
+router.route("/removefromplaylist").delete(isAuthenticated,removeFromPlaylist);
 
 
 export default router;
