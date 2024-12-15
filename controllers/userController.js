@@ -8,15 +8,10 @@ import crypto from "crypto";
 import getDataUri from "../utils/dataUri.js";
 import cloudinary from "cloudinary";
 
-
 export const register = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
-  const file=req.file; // avatar
-  
+  const file = req.file; // avatar
 
-  
-
-  
   if (!name || !email || !password || !file) {
     return next(new ErrorHandler("Please enter all fields", 400));
   }
@@ -28,9 +23,8 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 
   // upload file on cloudinary
   const fileUri = getDataUri(file);
-  
-  const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
+  const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
   user = await User.create({
     name,
@@ -48,8 +42,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 
 export const login = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
-
- 
 
   if (!email || !password) {
     return next(new ErrorHandler("Please enter all fields", 400));
@@ -130,25 +122,24 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
 
 export const updateProfilePicture = catchAsyncErrors(async (req, res, next) => {
   // upload file on cloudinary
-  const file=req.file; // avatar
+  const file = req.file; // avatar
 
-  if(!file){
+  if (!file) {
     return next(new ErrorHandler("Please enter all fields", 400));
   }
 
-  const user=await User.findById(req.user._id);
+  const user = await User.findById(req.user._id);
 
   const fileUri = getDataUri(file);
-  
+
   const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
-
-  user.avatar={
+  user.avatar = {
     public_id: myCloud.public_id,
     url: myCloud.secure_url,
-  }
+  };
 
   await user.save();
 
@@ -221,13 +212,11 @@ export const addToPlaylist = catchAsyncErrors(async (req, res, next) => {
 
   if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
 
-
   // console.log();
-  
 
   const itemExist = user.playlist.find((item) => {
     console.log(item);
-    
+
     if (item.course.toString() === course._id.toString()) return true;
   });
 
@@ -237,31 +226,86 @@ export const addToPlaylist = catchAsyncErrors(async (req, res, next) => {
     course: course._id,
     poster: course.poster.url,
   });
-  
+
   await user.save();
   res.status(200).json({
     success: true,
     message: "Added to playlist",
   });
 });
-export const removeFromPlaylist = catchAsyncErrors(
-  async (req, res, next) => {
-    const user = await User.findById(req.user._id);
+export const removeFromPlaylist = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
 
-    const course = await Course.findById(req.query.id);
-  
-    if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
-  
-  
-    const newPlaylist=user.playlist.filter(item=>{
-      if(item.course.toString()!==course._id.toString()) return item;
-    })
-  
-    user.playlist=newPlaylist;
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "Removed from playlist",
-    });
+  const course = await Course.findById(req.query.id);
+
+  if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
+
+  const newPlaylist = user.playlist.filter((item) => {
+    if (item.course.toString() !== course._id.toString()) return item;
+  });
+
+  user.playlist = newPlaylist;
+  await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Removed from playlist",
+  });
+});
+
+export const getAllUsers = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.find({});
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const updateUserRole = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return next(new ErrorHandler("User Not Found", 404));
+
+  if (user.role === "user") {
+    user.role = "admin";
+  } else {
+    user.role = "user";
   }
-);
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Role Updated",
+  });
+});
+export const deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return next(new ErrorHandler("User Not Found", 404));
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  // cancel subscription
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
+    message: "User Deleted Successfully",
+  });
+});
+export const deleteMyProfile = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  // cancel subscription
+
+  await user.remove();
+
+  res.status(200).cookie("token",null,{
+    expires:new Date(Date.now()),
+  }).json({
+    success: true,
+    message: "User Deleted Successfully",
+  });
+});
