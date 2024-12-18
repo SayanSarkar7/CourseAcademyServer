@@ -35,7 +35,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       url: myCloud.secure_url,
     },
   });
-  console.log(`in userController logging user: ${user}`);
+  // console.log(`in userController logging user: ${user}`);
 
   sendToken(res, user, "Registered Succesfully", 201);
 });
