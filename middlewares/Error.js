@@ -4,6 +4,7 @@ const ErrorMiddleware = (err, req, res, next) => {
   res.status(err.statusCode).json({
     success: false,
     message: err.message,
+    fileLocation:err.fileLocation,
   });
 };
 

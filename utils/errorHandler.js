@@ -1,8 +1,27 @@
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Get the file path
+// const currentFilePath = fileURLToPath(import.meta.url);
 class ErrorHandler extends Error{
     constructor(message,statusCode){
         super(message);
         this.statusCode=statusCode;
+        // Capture the stack trace and extract the location
+        // const stackTrace = new Error().stack;
+        // this.fileLocation = this.extractLocation(stackTrace);
+        // Get the file path
+        this.fileLocation = fileURLToPath(import.meta.url);
     }
+    // extractLocation(stack) {
+    //     const lines = stack.split("\n");
+    //     // Extract the second line of the stack trace (where the error was thrown)
+    //     // It usually contains the file name, line number, and column number
+    //     if (lines.length > 1) {
+    //         return lines[1].trim(); // Clean the string to remove unnecessary whitespace
+    //     }
+    //     return "Unknown location";
+    // }
 }
 export default ErrorHandler;
 

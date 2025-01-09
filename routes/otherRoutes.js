@@ -11,7 +11,7 @@ router.route("/contact").post(contact);
 router.route("/courserequest").post(courseRequest);
 
 // Get Admin Dashboard Stats
-router.route("/admin/stats").post(isAuthenticated,authorizeAdmin,getAdminDashboardStats);
+router.route("/admin/stats").get(isAuthenticated,authorizeAdmin,getAdminDashboardStats);
 
 
 
