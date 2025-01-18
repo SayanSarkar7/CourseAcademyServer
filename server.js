@@ -26,6 +26,10 @@ nodeCron.schedule("0 0 0 1 * *", async () => {
     console.log(error);
   }
 });
+// const temp=async ()=>{
+//   await Stats.create({});
+// }
+// temp()
 
 
 app.listen(process.env.PORT, () => {

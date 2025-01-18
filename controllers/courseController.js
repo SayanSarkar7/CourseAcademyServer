@@ -6,7 +6,19 @@ import ErrorHandler from "../utils/errorHandler.js";
 import cloudinary from "cloudinary";
 
 export const getAllCourses = catchAsyncErrors(async (req, res, next) => {
-  const courses = await Course.find().select("-lectures");
+  const keyword= req.query.keyword || "";
+  const category= req.query.category || "";
+  
+
+  const courses = await Course.find({
+    title:{
+      $regex:keyword,
+      $options:"i",
+    },category:{
+      $regex:category,
+      $options:"i",
+    },
+  }).select("-lectures");
   res.status(200).json({
     success: true,
     courses,
@@ -57,10 +69,16 @@ export const getCourseLectures = catchAsyncErrors(async (req, res, next) => {
 // Max Video Size 100 mb
 export const addLectures = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
+  // console.log("id: ",id);
+  
   const { title, description } = req.body;
+  // console.log("title: ",title);
+  // console.log("des: ",description);
 
   // const file=req.file;
   const course = await Course.findById(req.params.id);
+  // console.log("course: ",course);
+  
   if (!course) return next(new ErrorHandler("Course Not Found", 404));
 
   // Upload file here
@@ -70,7 +88,7 @@ export const addLectures = catchAsyncErrors(async (req, res, next) => {
   const myCloud = await cloudinary.v2.uploader.upload(fileUri.content, {
     resource_type: "video",
   });
-
+  // console.log("lectures: ",course);
   course.lectures.push({
     title,
     description,
@@ -79,6 +97,8 @@ export const addLectures = catchAsyncErrors(async (req, res, next) => {
       url: myCloud.secure_url,
     },
   });
+  // console.log("lectures: ",course);
+  
   course.numOfVideos = course.lectures.length;
   await course.save();
 

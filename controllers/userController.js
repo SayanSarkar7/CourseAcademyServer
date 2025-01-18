@@ -318,7 +318,9 @@ export const deleteMyProfile = catchAsyncErrors(async (req, res, next) => {
 User.watch().on("change", async () => {
   const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
   const subscription = await User.find({ "subscription.status": "active" });
-  stats[0].users = await User.countDoduments();
+  stats[0].users = await User.countDocuments();
+  // console.log(stats[0].users);
+  
   stats[0].subscriptions = subscription.length;
   stats[0].createdAt = new Date(Date.now());
 

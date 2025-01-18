@@ -4,7 +4,8 @@ import { authorizeAdmin, isAuthenticated } from "../middlewares/Auth.js";
 import singleUpload from "../middlewares/multer.js";
  
 const router=express.Router();
-
+// MONGO_URI=mongodb+srv://Sayan:Sayanmongo@cluster0.2loty.mongodb.net/courseAcademy?retryWrites=true
+// MONGO_URI= mongodb://127.0.0.1:27017/CourseAcademy
 
 // To register a new user
 router.route("/register").post(singleUpload,register);
